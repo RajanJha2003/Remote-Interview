@@ -1,15 +1,40 @@
 "use client"
 
 import ActionCard from '@/components/ActionCard'
+import MeetingModal from '@/components/MeetingModal'
 import { Button } from '@/components/ui/button'
 import { QUICK_ACTIONS } from '@/constants'
 import { useUserRole } from '@/hooks/useUserRole'
 import { SignInButton } from '@clerk/nextjs'
-import React from 'react'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
 
 const page = () => {
+  const router=useRouter();
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<"start" | "join">();
 
   const {isCandidate,isInterviewer,isLoading}=useUserRole();
+
+  const handleQuickAction=(title:string)=>{
+    switch(title){
+      case "New Call":
+        setModalType("start")
+        setShowModal(true);
+        break;
+
+       case "Join Interview":
+        setModalType("join");
+        setShowModal(true);
+        break;
+        
+        default:
+          router.push(`/${title.toLowerCase()}`)
+
+
+
+    }
+  }
 
   return (
     <div className='container max-w-7xl mx-auto p-6'>
@@ -30,11 +55,20 @@ const page = () => {
               <ActionCard
                 key={action.title}
                 action={action}
-                onClick={() => {}}
+                onClick={() => {handleQuickAction(action.title)}}
               />
             ))}
 
+
+
           </div>
+          <MeetingModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            title={modalType === "join" ? "Join Meeting" : "Start Meeting"}
+            isJoinMeeting={modalType === "join"}
+          />
+          
           </>
 
         ):(
